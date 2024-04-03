@@ -36,7 +36,7 @@ async def fetch_redirected_url(url):
 
 
 async def main():
-    sites_ = await fetch_index_page("https://theporndude.vip")
+    sites_ = await fetch_index_page("https://theporndude.com/zh")
     # print(sites_)
     soup = BeautifulSoup(sites_['data'], 'html.parser')
 
