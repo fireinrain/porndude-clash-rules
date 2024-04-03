@@ -4,8 +4,8 @@ porndude_sites = ['https://theporndude.vip/',
                   'https://pornsites.com/', 'https://porngeek.com/']
 
 
-def fetch_index_page() -> str:
-    index_url = 'https://theporndude.com/'
+def fetch_index_page(url: str) -> str:
+    index_url = url
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
@@ -42,4 +42,5 @@ def generate_clash_rules(sites: []):
 
 
 if __name__ == '__main__':
-    fetch_index_page()
+
+    fetch_index_page("https://pornsites.com/")
