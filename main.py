@@ -1,24 +1,41 @@
-import requests
+import asyncio
+
+import aiohttp
 
 porndude_sites = ['https://theporndude.vip/',
                   'https://pornsites.com/', 'https://porngeek.com/']
 
 
-def fetch_index_page(url: str) -> str:
-    index_url = url
+async def fetch_index_page(url: str) -> {}:
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
         'Referer': 'https://www.google.com/'
     }
-    resp = requests.get(index_url, headers=headers)
-    resp.raise_for_status()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            if response.status == 200:
+                resp = await response.text()
+                print(resp)
+                return {'url': url, 'data': resp}
+            else:
+                error = ValueError(f"Failed to fetch data from {url}, status code: {response.status}")
+                return {'url': url, 'data': error}
 
-    print(resp.text)
+
+async def fetch_multiple_urls(urls):
+    tasks = [fetch_index_page(url) for url in urls]
+    results = await asyncio.gather(*tasks)
+    return results
 
 
-def extract_static_resource(page_str: str) -> []:
+def extract_url_from_pornsites(page_str: str) -> []:
+    pass
 
+def extract_url_from_theporndude(page_str: str) -> []:
+    pass
+
+def extract_url_from_porngeek(page_str: str) -> []:
     pass
 
 
@@ -41,6 +58,25 @@ def generate_clash_rules(sites: []):
     pass
 
 
-if __name__ == '__main__':
+async def main():
+    pornsites_resp = await fetch_multiple_urls(porndude_sites)
+    all_site = []
+    for site in pornsites_resp:
+        if 'theporndude' in site['url']:
+            urls = extract_url_from_theporndude(site['data'])
+            all_site.append(urls)
+            continue
+        if 'porngeek' in site['url']:
+            urls = extract_url_from_porngeek(site['data'])
+            all_site.append(urls)
+            continue
+        if '' in site['url']:
+            urls = extract_url_from_pornsites(site['data'])
+            all_site.append(urls)
 
-    fetch_index_page("https://pornsites.com/")
+    generate_clash_rules(all_site)
+
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
