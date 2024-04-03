@@ -153,3 +153,16 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+    # from urllib.parse import urlparse
+    #
+    #
+    # def get_domain_from_url(url):
+    #     parsed_url = urlparse(url)
+    #     domain = parsed_url.netloc
+    #     return domain
+    #
+    #
+    # # Example usage:
+    # url = 'https://www.example.com/path/to/page'
+    # domain = get_domain_from_url(url)
+    # print("Domain:", domain)

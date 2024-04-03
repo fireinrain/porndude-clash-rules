@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 import aiohttp
 from bs4 import BeautifulSoup
 
-
 import asyncio
 from urllib.parse import urlparse
 import aiohttp
@@ -36,7 +35,7 @@ async def fetch_redirected_url(url):
 
 
 async def main():
-    sites_ = await fetch_index_page("https://theporndude.com/zh")
+    sites_ = await fetch_index_page("https://theporndude.vip")
     # print(sites_)
     soup = BeautifulSoup(sites_['data'], 'html.parser')
 
@@ -72,7 +71,7 @@ async def main():
             # 需要二次请求获取302跳转的地址
             real_link = await fetch_redirected_url(link)
             await asyncio.sleep(0.2)
-            resp_data = await fetch_index_page(real_link)
+            resp_data = await fetch_index_page(str(real_link))
             soup = BeautifulSoup(resp_data['data'], 'html.parser')
             aa_tags = soup.find_all('a')
             for aa in aa_tags:
@@ -94,32 +93,84 @@ async def main():
             domain_sets.add(domain)
         print(f'当前已获得域名数量: {len(domain_sets)}')
     # write domain set to a text file
-    with open('porndude.txt', 'w+') as f:
-        sites_str = '\n'.join(list(domain_sets))
-        f.write(sites_str)
+    generate_clash_rule('porndude.txt', list(domain_sets))
+    print(f"clash 规则生成完成")
+
+
+async def add_porndude_zh(html_file: str) -> set:
+    with open(html_file, 'r+') as f:
+        html_content = f.read()
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        a_tags = soup.find_all('a')
+        target_links = []
+        for a in a_tags:
+            href = a.get('href')
+            # make http to https
+            if href  is not None and 'https://' in href:
+                target_links.append(href)
+                continue
+            if href is not None and 'http://' in href:
+                new_href = href.replace('http://', 'https://')
+                target_links.append(new_href)
+        print(f"源链接数量: {len(a_tags)}")
+        print(f"处理后的连接数量: {len(target_links)}")
+        # 去除重复
+        # 先进行去重处理
+        s = set(target_links)
+        all_links = list(s)
+        print(f"去重后的连接数量: {len(s)}")
+        print(all_links)
+
+        domain_sets = set()
+        url_size = len(all_links)
+        for index, link in enumerate(all_links):
+            print(f"正在处理第{index + 1} 个链接, 还有: {url_size - index - 1},共有: {url_size}个链接...")
+            parsed_url = urlparse(link)
+            domain = parsed_url.netloc
+            if domain == 'theporndude.link':
+                # 需要二次请求获取302跳转的地址
+                real_link = await fetch_redirected_url(link)
+                await asyncio.sleep(0.2)
+                parsed_url = urlparse(real_link)
+                domain = parsed_url.netloc
+                domain_sets.add(domain)
+            else:
+                # 直接加入domain 列表
+                domain_sets.add(domain)
+
+            print(f'当前已获得域名数量: {len(domain_sets)}')
+    return set()
+
+
+def generate_clash_rule(file_name: str, domains: []):
+    results = []
+    result_rules = []
+    for domain in domains:
+        domain_split = domain.split('.')
+        size = len(domain_split)
+        if size == 2:
+            results.append(domain)
+            result_rules.append(f"  - '+.{domain}'")
+            continue
+        if size == 3:
+            dm = domain_split[-2] + '.' + domain_split[-1]
+            results.append(dm)
+            result_rules.append(f"  - '+.{dm}'")
+            continue
+        dm = domain_split[-2] + '.' + domain_split[-1]
+        results.append(dm)
+        result_rules.append(f"  - '+.{dm}'")
+
+    # payload:
+    # - '+.265.com'
+    clash_rules_str = '\n'.join(result_rules)
+    rules_str = 'payload:\n'
+    with open(file_name, 'w+') as f:
+        f.write(rules_str)
         f.flush()
-    print(f"写入完成")
 
 
 if __name__ == '__main__':
     asyncio.run(main())
-    # from urllib.parse import urlparse
-    #
-    #
-    # def get_domain_from_url(url):
-    #     parsed_url = urlparse(url)
-    #     domain = parsed_url.netloc
-    #     return domain
-    #
-    #
-    # # Example usage:
-    # url = 'https://www.example.com/path/to/page'
-    # domain = get_domain_from_url(url)
-    # print("Domain:", domain)
-
-
-
-
-
-
-
+    # asyncio.run(add_porndude_zh('PornDude-zh.html'))
