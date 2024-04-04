@@ -1,4 +1,5 @@
 import asyncio
+import ssl
 from urllib.parse import urlparse
 
 import aiohttp
@@ -27,12 +28,15 @@ async def fetch_index_page(url: str) -> {}:
 
 
 async def fetch_redirected_url(url):
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     }
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.get(url, allow_redirects=True, headers=headers) as response:
+            async with session.get(url, ssl=ssl_context,allow_redirects=True, headers=headers) as response:
                 return response.url
         except Exception as e:
             print(f"获取跳转链接异常: {e}")
@@ -100,15 +104,19 @@ async def main():
             domain_sets.add(domain)
         print(f'当前已获得域名数量: {len(domain_sets)}')
     # write domain set to a text file
-    cn_sets = await add_porndude_zh('PornDude-zh.html')
+    cn_sets = await add_porndude_static_source('PornDude-zh.html')
     domain_sets += cn_sets
+    ja_sets = await add_porndude_static_source('PornDude-ja.html')
+    domain_sets += ja_sets
     anti_set = await source_from_anti_porn()
     domain_sets += anti_set
     generate_clash_rule('porndude.txt', list(domain_sets))
+    generate_clash_rule('adults.txt', list(domain_sets))
+
     print(f"clash 规则生成完成")
 
 
-async def add_porndude_zh(html_file: str) -> set:
+async def add_porndude_static_source(html_file: str) -> set:
     with open(html_file, 'r+') as f:
         html_content = f.read()
         soup = BeautifulSoup(html_content, 'html.parser')
@@ -131,7 +139,7 @@ async def add_porndude_zh(html_file: str) -> set:
         s = set(target_links)
         all_links = list(s)
         print(f"去重后的连接数量: {len(s)}")
-        print(all_links)
+        # print(all_links)
 
         domain_sets = set()
         url_size = len(all_links)
@@ -190,5 +198,5 @@ def generate_clash_rule(file_name: str, domains: []):
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
-    # asyncio.run(add_porndude_zh('PornDude-zh.html'))
+    # asyncio.run(main())
+    asyncio.run(add_porndude_static_source('PornDude-zh.html'))
