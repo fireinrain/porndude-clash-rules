@@ -198,5 +198,5 @@ def generate_clash_rule(file_name: str, domains: []):
 
 
 if __name__ == '__main__':
-    # asyncio.run(main())
-    asyncio.run(add_porndude_static_source('PornDude-zh.html'))
+    asyncio.run(main())
+    # asyncio.run(add_porndude_static_source('PornDude-zh.html'))
