@@ -167,7 +167,7 @@ def generate_clash_rule(file_name: str, domains: []):
     clash_rules_str = '\n'.join(result_rules)
     rules_str = 'payload:\n'
     with open(file_name, 'w+') as f:
-        f.write(rules_str)
+        f.write(rules_str+clash_rules_str)
         f.flush()
 
 
