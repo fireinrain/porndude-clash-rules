@@ -12,7 +12,7 @@ async def source_from_anti_porn() -> set:
     with open(filename, 'r') as f:
         readlines = f.readlines()
         for line in readlines:
-            line = line.removeprefix("0.0.0.0    ")
+            line = line.replace("0.0.0.0    ",'')
             line = line.replace('\n', '')
             result.add(line)
     return result
