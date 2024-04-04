@@ -31,8 +31,12 @@ async def fetch_redirected_url(url):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, allow_redirects=True, headers=headers) as response:
-            return response.url
+        try:
+            async with session.get(url, allow_redirects=True, headers=headers) as response:
+                return response.url
+        except Exception as e:
+            print(f"获取跳转链接异常: {e}")
+            return None
 
 
 async def main():
@@ -71,6 +75,8 @@ async def main():
         if domain == 'theporndude.vip':
             # 需要二次请求获取302跳转的地址
             real_link = await fetch_redirected_url(link)
+            if real_link is None:
+                continue
             await asyncio.sleep(0.2)
             resp_data = await fetch_index_page(str(real_link))
             soup = BeautifulSoup(resp_data['data'], 'html.parser')
@@ -112,7 +118,7 @@ async def add_porndude_zh(html_file: str) -> set:
         for a in a_tags:
             href = a.get('href')
             # make http to https
-            if href  is not None and 'https://' in href:
+            if href is not None and 'https://' in href:
                 target_links.append(href)
                 continue
             if href is not None and 'http://' in href:
@@ -136,6 +142,8 @@ async def add_porndude_zh(html_file: str) -> set:
             if domain == 'porndude.link':
                 # 需要二次请求获取302跳转的地址
                 real_link = await fetch_redirected_url(link)
+                if real_link is None:
+                    continue
                 print(f"重定向到：{real_link}")
                 await asyncio.sleep(0.2)
                 domain = real_link.raw_host
@@ -177,7 +185,7 @@ def generate_clash_rule(file_name: str, domains: []):
     clash_rules_str = '\n'.join(result_rules)
     rules_str = 'payload:\n'
     with open(file_name, 'w+') as f:
-        f.write(rules_str+clash_rules_str)
+        f.write(rules_str + clash_rules_str)
         f.flush()
 
 
