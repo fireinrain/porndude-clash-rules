@@ -105,11 +105,11 @@ async def main():
         print(f'当前已获得域名数量: {len(domain_sets)}')
     # write domain set to a text file
     cn_sets = await add_porndude_static_source('PornDude-zh.html')
-    domain_sets += cn_sets
+    domain_sets = domain_sets.union(cn_sets)
     ja_sets = await add_porndude_static_source('PornDude-ja.html')
-    domain_sets += ja_sets
+    domain_sets = domain_sets.union(ja_sets)
     anti_set = await source_from_anti_porn()
-    domain_sets += anti_set
+    domain_sets = domain_sets.union(anti_set)
     generate_clash_rule('porndude.txt', list(domain_sets))
     generate_clash_rule('adults.txt', list(domain_sets))
 
