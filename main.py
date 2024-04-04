@@ -8,6 +8,7 @@ import asyncio
 from urllib.parse import urlparse
 import aiohttp
 from bs4 import BeautifulSoup
+from source import source_from_anti_porn
 
 
 async def fetch_index_page(url: str) -> {}:
@@ -93,6 +94,10 @@ async def main():
             domain_sets.add(domain)
         print(f'当前已获得域名数量: {len(domain_sets)}')
     # write domain set to a text file
+    cn_sets = await add_porndude_zh('PornDude-zh.html')
+    domain_sets += cn_sets
+    anti_set = await source_from_anti_porn()
+    domain_sets += anti_set
     generate_clash_rule('porndude.txt', list(domain_sets))
     print(f"clash 规则生成完成")
 
@@ -128,19 +133,24 @@ async def add_porndude_zh(html_file: str) -> set:
             print(f"正在处理第{index + 1} 个链接, 还有: {url_size - index - 1},共有: {url_size}个链接...")
             parsed_url = urlparse(link)
             domain = parsed_url.netloc
-            if domain == 'theporndude.link':
+            if domain == 'porndude.link':
                 # 需要二次请求获取302跳转的地址
                 real_link = await fetch_redirected_url(link)
+                print(f"重定向到：{real_link}")
                 await asyncio.sleep(0.2)
-                parsed_url = urlparse(real_link)
-                domain = parsed_url.netloc
+                domain = real_link.raw_host
                 domain_sets.add(domain)
+                continue
+            if domain == 'theporndude.com':
+                # TODO fetch site and parse site url
+                # print(f"当前链接: {link}")
+                continue
             else:
                 # 直接加入domain 列表
                 domain_sets.add(domain)
 
             print(f'当前已获得域名数量: {len(domain_sets)}')
-    return set()
+    return domain_sets
 
 
 def generate_clash_rule(file_name: str, domains: []):
@@ -172,5 +182,5 @@ def generate_clash_rule(file_name: str, domains: []):
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
-    # asyncio.run(add_porndude_zh('PornDude-zh.html'))
+    # asyncio.run(main())
+    asyncio.run(add_porndude_zh('PornDude-zh.html'))
