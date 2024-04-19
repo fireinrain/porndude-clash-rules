@@ -170,6 +170,8 @@ async def add_porndude_static_source(html_file: str) -> set:
 
 
 def generate_clash_rule(file_name: str, domains: []):
+    ds = set(domains)
+    domains = list(ds)
     results = []
     result_rules = []
     for domain in domains:

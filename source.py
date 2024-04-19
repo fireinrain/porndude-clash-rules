@@ -4,10 +4,10 @@ import aiohttp
 
 
 async def source_from_anti_porn() -> set:
-    url = 'https://raw.githubusercontent.com/4skinSkywalker/Anti-Porn-HOSTS-File/master/HOSTS.txt'
+    # url = 'https://raw.githubusercontent.com/4skinSkywalker/Anti-Porn-HOSTS-File/master/HOSTS.txt'
     filename = 'HOSTS.txt'
-    await fetch_and_save_file(url, filename)
-    print(f"File downloaded as {filename}")
+    # await fetch_and_save_file(url, filename)
+    # print(f"File downloaded as {filename}")
     result = set()
     with open(filename, 'r') as f:
         readlines = f.readlines()
